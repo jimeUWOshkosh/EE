@@ -1,8 +1,9 @@
 package Asset::Area;
 use feature 'say';
 use Moose;
+our $VERSION = '1.00';
 use experimental 'signatures';
-no warnings qw(experimental::signatures);
+no warnings qw(experimental::signatures);    ## no critic
 use namespace::autoclean;
 use English;
 use Carp 'croak';
@@ -26,8 +27,8 @@ has 'arg_text' => (
     isa => 'Str',
 );
 has 'rc' => (
-    is  => 'rw',
-    isa => 'Int',
+    is      => 'rw',
+    isa     => 'Int',
     default => 0,
 );
 
@@ -36,19 +37,28 @@ around BUILDARGS => sub {
     my $orig    = shift;
     my $class   = shift;
     my $perform = shift;
-    my ($obj, $rc);
-    eval { 
-        if      ((scalar(@_) == 1) and (ref $_[0])) {
+    my ( $obj, $rc );
+    eval {
+        if ( ( scalar(@_) == 1 ) and ( ref $_[0] ) ) {
             ouch 'Bad SVO syntax', 'Bad SVO syntax';
-        } elsif ( scalar(@_) == 3 ) {
-            my ($subject,$verb,$object) = @_;
-            my $str = 'Area ( ' .  blessed($subject)  .  ' => '      .  $verb .
-                      ' => '    .  $object            .  " ),\n";
-            $rc = ($perform) ? process() : 0;
-            $obj = $class->$orig( subject => $subject, verb     => $verb, 
-                                  object  => $object,  arg_text => $str,
-			          rc      => $rc, );
-        } else {
+        }
+        elsif ( scalar(@_) == 3 ) {
+            my ( $subject, $verb, $object ) = @_;
+            my $str =
+                'Area ( '
+              . blessed($subject) . ' => '
+              . $verb . ' => '
+              . $object . " ),\n";
+            $rc  = ($perform) ? process() : 0;
+            $obj = $class->$orig(
+                subject  => $subject,
+                verb     => $verb,
+                object   => $object,
+                arg_text => $str,
+                rc       => $rc,
+            );
+        }
+        else {
             ouch 'Bad number of arguments', 'Bad number of arguments';
         }
         1;
@@ -65,9 +75,9 @@ sub BUILD {
 }
 
 sub process ($obj) {
-    say __PACKAGE__, ':process';
-    return (-e "debug/Area" )? 0: 1;
-};
+    my $rc = say __PACKAGE__, ':process';
+    return ( -e 'debug/Area' ) ? 0 : 1;
+}
 
 __PACKAGE__->meta->make_immutable;
 1;
