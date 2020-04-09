@@ -20,6 +20,7 @@ has 'trans_mesg' => ( # ErrorLog message about the Economic Exchange transaction
 
 my @procedures;       # steps to be performed in the Economic Exchange
 my @touched;          # logs the steps that have been attempted
+my @returncodes;      # return codes of steps
 our $TESTING = 0;     # for testing Ovid type ErrorLog
 my $rs_perform
   ;    # refernce to $Perform::__perform, TRUE to perform/execute step or
@@ -75,6 +76,7 @@ sub _steps {
             ouch 'No object returned', 'No object returned' if ( not $obj );
 
             $touched[$pos1] = GiveMeTheBehavior( $step->[0] ) . $obj->arg_text;
+            $returncodes[$pos1] = $obj->rc;
 
             # get out, No more behaviors, create log
             ouch 'Bad ASSERT', 'Bad ASSERT' if ( not( $obj->rc ) );
@@ -91,6 +93,7 @@ sub _steps {
                 ouch 'No object returned', 'No object returned' if ( not $obj );
                 $touched[$pos2] =
                   GiveMeTheBehavior( $steps[$j][0] ) . $obj->arg_text;
+                $returncodes[$pos2] = $obj->rc;
 
                 # Cleanup, do FAILURE behaviors
                 last if ( not( $obj->rc ) );
@@ -102,11 +105,14 @@ sub _steps {
 
             # hit all FAILUREs, starting where ASSERTs left off
             for my $j ( $pos1 .. $#steps ) {
-                next if ( $touched[$j] );
+#                next if ( $touched[$j] );
+		if (defined $returncodes[$j]) {
+		    next if ($returncodes[$j]);
+		}
                 if (
                     ( defined $steps[$j][0] )
-                    and (  ( $steps[$j][1] eq 'FAILURE' )
-                        or ( $steps[$j][1] eq 'ALWAYS' ) )
+                    and (  ( $steps[$j][0] eq 'FAILURE' )
+                        or ( $steps[$j][0] eq 'ALWAYS' ) )
                   )
                 {
                     $object = $steps[$j][1]();
