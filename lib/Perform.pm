@@ -1,4 +1,4 @@
-package Some::Module;  # assumes Some/Module.pm
+package Perform;
 
 use strict;
 use warnings;
